@@ -1,0 +1,1 @@
+Production sync marker for current main branch: restored original design, visual-only imagery/logo changes, and terminology cleanup.
