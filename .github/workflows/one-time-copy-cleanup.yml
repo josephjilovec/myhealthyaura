@@ -1,0 +1,53 @@
+name: One-time My Healthy Aura copy cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-copy-cleanup.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup-copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update requested wording
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          # Requested headline wording: remove "insight" while preserving meaning.
+          text = re.sub(
+              r'Bridge the gap between insight and daily execution',
+              'Bridge the gap between intention and daily execution',
+              text,
+              flags=re.IGNORECASE,
+          )
+
+          # Remove "intake" terminology everywhere so no visible instance remains.
+          text = re.sub(r'\bPrivate intake\b', 'Private contact', text, flags=re.IGNORECASE)
+          text = re.sub(r'\bSubmit intake request\b', 'Submit request', text, flags=re.IGNORECASE)
+          text = re.sub(r'\bintake\b', 'request', text, flags=re.IGNORECASE)
+
+          path.write_text(text, encoding='utf-8')
+          PY
+      - name: Commit cleanup
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No copy changes needed."
+            exit 0
+          fi
+          git config user.name "Joseph Jilovec Site Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Remove insight and intake wording from My Healthy Aura"
+          git push
