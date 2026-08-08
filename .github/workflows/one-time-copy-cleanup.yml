@@ -25,17 +25,22 @@ jobs:
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
 
-          # Requested headline wording: remove "insight" while preserving meaning.
-          text = re.sub(
-              r'Bridge the gap between insight and daily execution',
-              'Bridge the gap between intention and daily execution',
-              text,
-              flags=re.IGNORECASE,
-          )
+          replacements = {
+              'Bridge the gap between insight and daily execution.': 'Bridge the gap between intention and daily execution.',
+              'Insight matters. What you do with it matters more.': 'Awareness matters. What you do with it matters more.',
+              'Structured request': 'Initial assessment',
+              'the patterns and constraints uncovered during request': 'the patterns and constraints uncovered during your first conversation',
+              'A structured behavioral request and assessment': 'A structured behavioral assessment',
+              'Individual session design based on request findings': 'Individual session design based on what we learn',
+              'Begin the request process': 'Begin the conversation',
+              'The first step is a structured behavioral request—not a generic contact form.': 'The first step is a structured behavioral questionnaire—not a generic contact form.',
+              'New My Healthy Aura request Request': 'New My Healthy Aura Request',
+          }
+          for old, new in replacements.items():
+              text = text.replace(old, new)
 
-          # Remove "intake" terminology everywhere so no visible instance remains.
-          text = re.sub(r'\bPrivate intake\b', 'Private contact', text, flags=re.IGNORECASE)
-          text = re.sub(r'\bSubmit intake request\b', 'Submit request', text, flags=re.IGNORECASE)
+          # Guarantee the two unwanted terms do not remain in visible/source copy.
+          text = re.sub(r'\binsight\b', 'awareness', text, flags=re.IGNORECASE)
           text = re.sub(r'\bintake\b', 'request', text, flags=re.IGNORECASE)
 
           path.write_text(text, encoding='utf-8')
@@ -49,7 +54,7 @@ jobs:
           git config user.name "Joseph Jilovec Site Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Remove insight and intake wording from My Healthy Aura"
+          git commit -m "Refine My Healthy Aura wording"
           git push
 
-# Triggered once after creation so the cleanup runs on the current main branch.
+# One-time utility for this specific copy cleanup.
